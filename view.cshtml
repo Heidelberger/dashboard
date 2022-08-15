@@ -1,0 +1,454 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+@section Header
+{    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+}
+
+<BR/>
+
+<div class="row text-white" style="background-color:#f04b55">
+    <div class="text-center text-white">    
+        <h1 class="display-4">Impressionen</h1>    
+    </div>
+</div>
+
+<BR/>
+
+<div class="row align-items-start" style="background-color:white">
+    <div class="col-6 align-self-center">
+        <div class="btn btn-light m-2" style="background-color:#f04b55">
+            <label for="startdate" class="text-white">Start Date:</label>
+            <input type="date" id="startdate" name="startdate" value="2021-12-13" onchange="dateChange(event)">
+        </div>
+        <div class="btn btn-light m-2" style="background-color:#f04b55">
+            <label for="enddate" class="text-white">End Date:</label>
+            <input type="date" id="enddate" name="enddate" value="2021-12-31" onchange="dateChange(event)">
+        </div>
+    </div>
+    <div class="col align-self-center">        
+        <div style="color:#f04b55" class="btn-group m-2" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" name="btnradio" id="btnhourly" autocomplete="off">
+            <label class="btn btn-outline-secondary" for="btnhourly">Hourly</label>
+
+            <input type="radio" class="btn-check" name="btnradio" id="btndaily" autocomplete="off" checked>
+            <label class="btn btn-outline-secondary" for="btndaily">Daily</label>
+
+            <input type="radio" class="btn-check" name="btnradio" id="btnweekly" autocomplete="off">
+            <label class="btn btn-outline-secondary" for="btnweekly">Weekly</label>
+        </div>
+    </div>  
+    <div class="col align-self-center">
+        <div class="h5" id="totalimpressionen">Totale Impressionen: (...loading)</div>
+    </div>
+
+</div>            
+
+<div class="row" style="background-color:white">
+    <div id="myReceiptTagEventsChart"></div>
+</div>
+
+<div class="row" style="background-color:white">    
+    <div class="col text-center">            
+        <div class="form-check form-switch form-check-inline">
+          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" value="Erzielte Impressionen" onclick="toggleSeries(this)" style="background-color:#af3241;border-color:#af3241" checked>
+          <label class="form-check-label" for="flexSwitchCheckDefault">Erzielte Impressionen</label>
+        </div>
+        <div class="form-check form-switch  form-check-inline">
+          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" value="Geplante Impressionen" onclick="toggleSeries(this)" style="background-color:#62626e;border-color:#62626e" checked>
+          <label class="form-check-label" for="flexSwitchCheckChecked">Geplante Impressionen</label>
+        </div>
+        <div class="form-check form-switch  form-check-inline">
+          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDisabled" value="Totale erzielte Impressionen" onclick="toggleSeries(this)" style="background-color:#f04b55;border-color:#f04b55" checked>
+          <label class="form-check-label" for="flexSwitchCheckDisabled">Totale erzielte Impressionen</label>
+        </div>
+        <div class="form-check form-switch  form-check-inline">
+          <input class="form-check-input" type="checkbox" id="flexSwitchCheckCheckedDisabled" value="Total geplante Impressionen" onclick="toggleSeries(this)" style="background-color:#2d2d37;border-color:#2d2d37" checked>
+          <label class="form-check-label" for="flexSwitchCheckCheckedDisabled">Total geplante Impressionen</label>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+<script>
+    var options = {
+        series: [{
+            name: 'Erzielte Impressionen',
+            type: 'column',
+            data: []
+        }, {
+            name: 'Geplante Impressionen',
+            type: 'column',
+            data: []
+        }, {
+            name: 'Totale erzielte Impressionen',
+            type: 'line',
+            data: []
+        }, {
+            name: 'Total geplante Impressionen',
+            type: 'line',
+            data: []
+        }],
+        colors: ['#af3241', '#62626e', '#f04b55', '#2d2d37'],
+        chart: {
+            height: 500,
+            type: 'line',
+            stacked: false,
+            toolbar: {
+                show: true,
+                offsetX: -100,
+                offsetY: 0
+            },               
+        },          
+        tooltip: {
+            style: {
+                //fontSize: '20px',
+                //fontFamily: 'Roboto'
+            },
+            //custom: function({series, seriesIndex, dataPointIndex, w}) {
+            //    return '<div class="arrow_box">' +
+            //    '<span>' + series[seriesIndex][dataPointIndex] + '</span>' +
+            //    '</div>'
+            //},
+            x: {          
+                format: 'dd MMM HH:mm'
+            },
+            y: [{
+                formatter: function (y) {
+                    if(typeof y !== "undefined") {
+                        return y.toFixed(0);
+                    }
+                    return 31;            
+                }
+            }, {
+                formatter: function (y) {
+                    if(typeof y !== "undefined") {
+                        return y.toFixed(2);
+                    }
+                    return 55;            
+                }
+            }],            
+            marker: {
+                show: false
+            },            
+            fixed: {
+                enabled: true,
+                position: 'topLeft',
+                offsetX: 100,
+                offsetY: 35
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            show: true,                
+            curve: 'straight',
+            linecap: 'round',
+            colors: undefined,
+            width: [1, 1, 3, 3],
+            dashArray: [0,0,0,10]
+        },
+        plotOptions: {
+            bar: {
+                columnWidth: '80%'
+            }
+        },       
+        xaxis: {
+            type: 'datetime',
+            tooltip: {
+                enabled: false
+            }
+        },            
+        yaxis: [
+            {                    
+                seriesName: 'Erzielte Impressionen',
+                showAlways: true,
+                axisTicks: {
+                    show: true,
+                },
+                axisBorder: {
+                    show: true,
+                    color: '#af3241',
+                    offsetX: -4
+                },
+                labels: {
+                    style: {
+                        colors: '#af3241',
+                        fontSize: '16px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 400,
+                    }
+                },
+                title: {
+                    text: "Impressionen",
+                    style: {
+                        color: '#af3241',                    
+                        fontSize: '18px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 500,
+                    }
+                },
+                tooltip: {
+                    enabled: false,                                       
+                }
+            },
+            {
+                seriesName: 'Erzielte Impressionen',
+                show: false
+            },
+            {
+                seriesName: 'Totale erzielte Impressionen',
+                showAlways: true,
+                opposite: true,
+                axisTicks: {
+                    show: true,
+                },
+                axisBorder: {
+                    show: true,
+                    color: '#f04b55',
+                    offsetX: -9
+                },
+                labels: {
+                    style: {
+                        colors: '#f04b55',
+                        fontSize: '16px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 400
+                    },
+                },
+                title: {
+                    text: "Totale Impressionen",
+                    style: {
+                        color: '#f04b55',                        
+                        fontSize: '18px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 500                  
+                    }
+                }
+            },
+            {
+            seriesName: 'Totale erzielte Impressionen',
+            show: false
+            }
+        ],            
+        legend: {
+            show: false
+        },
+        noData: {
+            text: 'Loading...'
+        }
+    };
+    var ReceiptTagEventsChart = new ApexCharts(document.querySelector("#myReceiptTagEventsChart"), options);
+    ReceiptTagEventsChart.render();
+    // toggleSeries accepts a single argument which should match the series name you're trying to toggle
+    function toggleSeries(checkbox) {
+        ReceiptTagEventsChart.toggleSeries(checkbox.value)
+    }
+    // provides timezone and proper formatting for datepickers
+    Date.prototype.toDateInputValue = (function() {
+        var local = new Date(this);
+        local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+        return local.toJSON().slice(0,10);
+    });
+    // set the min/max/selected dates in the date-pickers
+    function setDatePickers(response) {  
+        const newArr2 = response.seriesA.map(d => d[0]); // get just the datetimes              
+        const minDate = new Date(Math.min.apply(null, newArr2));
+        const maxDate = new Date(Math.max.apply(null, newArr2));
+  
+        $('#startdate').attr("min", minDate.toDateInputValue());
+        $('#startdate').attr("max", maxDate.toDateInputValue());
+        $('#startdate').val(minDate.toDateInputValue());            
+        
+        $('#enddate').attr("min", minDate.toDateInputValue());
+        $('#enddate').attr("max", maxDate.toDateInputValue());
+        $('#enddate').val(maxDate.toDateInputValue());
+    }
+    $(document).ready(function(){  
+        $.getJSON('/Dashboard/GetCountContacts', function (response) {  
+            $('#totalimpressionen').text("Totale Impressionen: " + response);
+        });
+        $.getJSON('/Dashboard/GetDataContactsDaily', function (response) {  
+            setDatePickers(response);          
+            ReceiptTagEventsChart.updateOptions({
+                series: [{
+                    name: 'Erzielte Impressionen',
+                    data: response.seriesA
+                },{
+                    name: 'Geplante Impressionen',
+                    data: response.seriesB
+                },{
+                    name: 'Totale erzielte Impressionen',
+                    data: response.seriesC
+                },{
+                    name: 'Total geplante Impressionen',
+                    data: response.seriesD
+                }
+                ],
+                chart: {
+                    events : {
+                        beforeZoom : function(ReceiptTagEventsChart, {xaxis}) {  
+                            const newArr = response.seriesA.map(d => d[0]); // get just the datetimes  
+                            return {
+                                // Do not allow zooming beyond the max/min values in the data
+                                xaxis: {
+                                    min: xaxis.min < Math.min.apply(null, newArr) ? Math.min.apply(null, newArr) : xaxis.min,
+                                    max: xaxis.max > Math.max.apply(null, newArr) ? Math.max.apply(null, newArr) : xaxis.max
+                                }
+                            }
+                        }
+                    }
+                },          
+                tooltip: {
+                    x: {          
+                        format: 'dd MMM'
+                    },
+                }
+            });   
+        });            
+    });
+                
+     function dateChange(e) {            
+        ReceiptTagEventsChart.zoomX(
+            new Date(document.getElementById("startdate").value).getTime(),
+            new Date(document.getElementById("enddate").value).getTime()
+        );
+    }
+    $(document).ready(function(){
+        $("#btnhourly").click(function(){
+            $.getJSON('/Dashboard/GetDataContactsHourly', function (response) {
+                setDatePickers(response);                
+                ReceiptTagEventsChart.updateOptions({
+                    series: [{
+                        name: 'Erzielte Impressionen',
+                        data: response.seriesA
+                    },{
+                        name: 'Geplante Impressionen',
+                        data: response.seriesB
+                    },{
+                        name: 'Totale erzielte Impressionen',
+                        data: response.seriesC
+                    },{
+                        name: 'Total geplante Impressionen',
+                        data: response.seriesD
+                    }
+                    ],  
+                    chart: {
+                        events : {
+                            beforeZoom : function(ReceiptTagEventsChart, {xaxis}) {  
+                                const newArr = response.seriesA.map(d => d[0]); // get just the datetimes  
+                                return {
+                                    // Do not allow zooming beyond the max/min values in the data
+                                    xaxis: {
+                                        min: xaxis.min < Math.min.apply(null, newArr) ? Math.min.apply(null, newArr) : xaxis.min,
+                                        max: xaxis.max > Math.max.apply(null, newArr) ? Math.max.apply(null, newArr) : xaxis.max
+                                    }
+                                }
+                            }
+                        }
+                    },    
+                    tooltip: {
+                        x: {          
+                            format: 'dd MMM HH:mm'
+                        }
+                    }                    
+                });      
+            });
+        });
+    });
+    $(document).ready(function(){
+        $("#btndaily").click(function(){                
+            $.getJSON('/Dashboard/GetDataContactsDaily', function (response) {
+                setDatePickers(response);                 
+                ReceiptTagEventsChart.updateOptions({
+                    series: [{
+                        name: 'Erzielte Impressionen',
+                        data: response.seriesA
+                    },{
+                        name: 'Geplante Impressionen',
+                        data: response.seriesB
+                    },{
+                        name: 'Totale erzielte Impressionen',
+                        data: response.seriesC
+                    },{
+                        name: 'Total geplante Impressionen',
+                        data: response.seriesD
+                    }
+                    ],                       
+                    chart: {
+                        events : {
+                            beforeZoom : function(ReceiptTagEventsChart, {xaxis}) {  
+                                const newArr = response.seriesA.map(d => d[0]); // get just the datetimes  
+                                return {
+                                    // Do not allow zooming beyond the max/min values in the data
+                                    xaxis: {
+                                        min: xaxis.min < Math.min.apply(null, newArr) ? Math.min.apply(null, newArr) : xaxis.min,
+                                        max: xaxis.max > Math.max.apply(null, newArr) ? Math.max.apply(null, newArr) : xaxis.max
+                                    }
+                                }
+                            }
+                        }
+                    },    
+                    tooltip: {
+                        x: {          
+                            format: 'dd MMM'
+                        },
+                    }
+                });  
+            });
+        });
+    });
+    $(document).ready(function(){
+        $("#btnweekly").click(function(){
+            $.getJSON('/Dashboard/GetDataContactsWeekly', function (response) {
+                setDatePickers(response);                
+                ReceiptTagEventsChart.updateOptions({
+                    series: [{
+                        name: 'Contacts',
+                        data: response.seriesA
+                    },{
+                        name: 'Geplante Impressionen',
+                        data: response.seriesB
+                    },{
+                        name: 'Totale erzielte Impressionen',
+                        data: response.seriesC
+                    },{
+                        name: 'Total geplante Impressionen',
+                        data: response.seriesD
+                    }
+                    ],                              
+                    chart: {
+                        events : {
+                            beforeZoom : function(ReceiptTagEventsChart, {xaxis}) {  
+                                const newArr = response.seriesA.map(d => d[0]); // get just the datetimes  
+                                return {
+                                    // Do not allow zooming beyond the max/min values in the data
+                                    xaxis: {
+                                        min: xaxis.min < Math.min.apply(null, newArr) ? Math.min.apply(null, newArr) : xaxis.min,
+                                        max: xaxis.max > Math.max.apply(null, newArr) ? Math.max.apply(null, newArr) : xaxis.max
+                                    }
+                                }
+                            }
+                        }
+                    },    
+                    tooltip: {
+                        x: {          
+                            format: 'dd MMM'
+                        },
+                    }
+                }); 
+            });
+        });
+    });
+    function dateChange(e) {   
+        ReceiptTagEventsChart.zoomX(
+            new Date(document.getElementById("startdate").value).getTime(),
+            new Date(document.getElementById("enddate").value).getTime()
+        );
+    }
+</script>
+}
